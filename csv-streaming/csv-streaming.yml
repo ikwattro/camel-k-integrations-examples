@@ -1,0 +1,21 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: csv-transformer
+spec:
+  dependencies:
+    - "camel:camel-csv"
+  flows:
+  - from:
+      uri: timer:java
+      parameters:
+        period: 100000
+      steps:
+        - to: https://raw.githubusercontent.com/Delawen/camel-k-example-transformations/master/data.csv
+        - unmarshal:
+            csv:
+              use-maps: true
+        - split:
+            simple: "${body}"
+            streaming: true
+        - log: "${body}"

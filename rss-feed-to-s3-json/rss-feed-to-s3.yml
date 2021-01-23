@@ -1,0 +1,31 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: rss-to-s3
+spec:
+  flows:
+  - from:
+      uri: rss://http://feeds.feedburner.com/TechCrunch/startups?splitEntries=true&delay=1000
+      steps:
+        - marshal:
+            rss: {}
+        - set-header:
+            name: title
+            xpath: "//item/title/text()"
+        - set-header:
+            name: description
+            xpath: "//item/description/text()"
+        - set-header:
+            name: id
+            xpath: 
+              expression: "//item/link/text()"
+              result-type: "java.lang.String"
+        - set-body:
+            simple: '{"id": "${header.id}", "title": "${header.title}", "description": "${header.description}"'
+        - set-header:
+            name: CamelAwsS3Key
+            simple: "rss/techrunch/${header[id].replaceAll('[^A-Za-z0-9]', '')}.json"
+        - marshal:
+            json: {}
+        - log: "${header.CamelAwsS3Key}"
+        - to: aws-s3://mybucket?accessKey=RAW(XXX)&secretKey=RAW(XXX)&region=EU_WEST_1

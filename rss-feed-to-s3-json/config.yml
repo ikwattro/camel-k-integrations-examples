@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rss-to-s3-configmap
+data:
+  application.properties: |
+    ACCESS_KEY={{secret:aws/ACCESS_KEY}}
+    SECRET_KEY={{secret:aws/SECRET_KEY}}
+    REGION=EU_WEST_1
+    BUCKET=mybucket

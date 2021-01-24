@@ -3,6 +3,11 @@ kind: Integration
 metadata:
   name: rss-to-s3
 spec:
+  configuration:
+    - type: configmap
+      value: rss-to-s3-configmap
+    - type: secret
+      value: aws
   flows:
   - from:
       uri: rss://http://feeds.feedburner.com/TechCrunch/startups?splitEntries=true&delay=1000
@@ -28,4 +33,9 @@ spec:
         - marshal:
             json: {}
         - log: "${header.CamelAwsS3Key}"
-        - to: aws-s3://mybucket?accessKey=RAW(XXX)&secretKey=RAW(XXX)&region=EU_WEST_1
+        - to:
+            uri: aws-s3://{{BUCKET}}
+            parameters:
+                accessKey: "{{ACCESS_KEY}}"
+                secretKey: "{{SECRET_KEY}}"
+                region: "{{REGION}}"

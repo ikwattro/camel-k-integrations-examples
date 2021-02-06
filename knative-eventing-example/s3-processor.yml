@@ -1,0 +1,30 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: kn-s3-processor
+spec:
+  dependencies:
+    - "camel:jackson"
+  configuration:
+    - type: configmap
+      value: rss-to-s3-configmap
+    - type: secret
+      value: aws
+  flows:
+  - from:
+      uri: "knative:event/csv"
+      steps:
+        - unmarshal:
+            json: {}
+        - set-header:
+            name: CamelAwsS3Key
+            simple: "articles/converted/${body[id]}.json"
+        - marshal:
+            json: {}
+        - log: "${header.CamelAwsS3Key}"
+        - to:
+            uri: aws-s3://{{BUCKET}}
+            parameters:
+                accessKey: "{{ACCESS_KEY}}"
+                secretKey: "{{SECRET_KEY}}"
+                region: "{{REGION}}"

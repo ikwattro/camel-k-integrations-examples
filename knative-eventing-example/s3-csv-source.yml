@@ -1,0 +1,36 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: kn-csv-reader
+spec:
+  dependencies:
+    - "camel:jackson"
+    - "camel:csv"
+  configuration:
+    - type: configmap
+      value: rss-to-s3-configmap
+    - type: secret
+      value: aws
+  flows:
+   - from:
+      uri: aws-s3://hume-datasets
+      parameters:
+        prefix: articles
+        accessKey: "{{ACCESS_KEY}}"
+        secretKey: "{{SECRET_KEY}}"
+        region: "{{REGION}}"
+        deleteAfterRead: false
+      steps:
+        - unmarshal:
+            csv:
+              use-maps: true
+              allow-missing-column-names: true
+        - split:
+            simple: "${body}"
+            streaming: true
+        - log: "${body}"
+        - remove-headers:
+            pattern: "*"
+        - marshal:
+            json: {}
+        - to: "knative:event/csv"

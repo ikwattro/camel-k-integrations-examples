@@ -1,0 +1,24 @@
+apiVersion: camel.apache.org/v1
+kind: Integration
+metadata:
+  name: sourcecsv
+spec:
+  dependencies:
+    - "camel:camel-csv"
+  flows:
+  - from:
+      uri: timer:java
+      parameters:
+        period: 100000
+      steps:
+        - to: https://gist.githubusercontent.com/ikwattro/f8d17e0d0bb1ccab738e77d82d58146b/raw/65c1ce2c8be8ea3733c5b933d880648c8bec28e8/source500.csv
+        - unmarshal:
+            csv:
+              use-maps: true
+        - split:
+            simple: "${body}"
+            streaming: true
+        - log: "${body}"
+        - marshal:
+            json: {}
+        - to: "knative:event/sourcecsv"

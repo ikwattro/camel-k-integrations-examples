@@ -25,7 +25,19 @@ The second integration will listen for the knative events, aggregate and log the
 ```bash
 kamel run AggregationRoute.java
 
-kubectl scale it aggregation-route --replicas=5
+kubectl scale it aggregation-route --replicas 5
+```
+
+```bash
+$ kubectl get po
+NAME                                                  READY   STATUS             RESTARTS   AGE
+aggregation-route-00001-deployment-54c46b68b7-2xtds   2/2     Running            0          19s
+aggregation-route-00001-deployment-54c46b68b7-crbgq   2/2     Running            0          46s
+aggregation-route-00002-deployment-d46865898-2ptw8    1/2     Running            1          30s
+aggregation-route-00002-deployment-d46865898-2vs84    1/2     Running            1          30s
+aggregation-route-00002-deployment-d46865898-nggfb    1/2     Running            1          30s
+aggregation-route-00002-deployment-d46865898-vdzmr    2/2     Running            0          31s
+aggregation-route-00002-deployment-d46865898-zz6vg    1/2     Running            1          30s
 ```
 
 Then we will start the csv reader : 
